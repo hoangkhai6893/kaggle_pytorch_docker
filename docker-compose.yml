@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  kaggle_pytorch:
+    image: kaggle_pytorch:1.11.0-cuda11.3-cudnn8-runtime
+    runtime: nvidia 
+    ports:
+      - "8888:8888"
+    shm_size: '300gb'
+    environment:
+      DISPLAY: ${DISPLAY}
+      SCREEN_RESOLUTION: ${SCREEN_RESOLUTION}
+      VNC_PASSWORD: passpass
+      USE_VNC: "true"
+      LOCAL_UID: ${UID} 
+      LOCAL_GID: ${GID}
+    volumes:
+      - ../kaggle_pytorch_docker:/home/dkhai/kaggle_pytorch_docker
+    tty: "true"
+
+    build: 
+      context: .
+      shm_size: '4gb'
+      dockerfile: ./Dockerfile
+      args:
+        - VERSION_CUDA=11.8.0
+        - VERSION_PYTORCH=1.11.0
+        - USER_ID=1000
+        - GROUP_ID=1000
+        - USERNAME=dkhai
+      x-bake:
+        tags:
+          -  kaggle_pytorch:1.11.0-cuda11.3-cudnn8-runtime
+    
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
